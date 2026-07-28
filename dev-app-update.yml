@@ -1,0 +1,12 @@
+# Feed de teste do auto-update (só usado quando TORRE_UPDATE_DEV=1, em dev).
+# Em produção o feed vem do bloco "publish" do package.json (GitHub privado).
+#
+# Como testar sem publicar no GitHub:
+#  1. tenha um instalador NOVO em release/ (versão MAIOR que a atual). Ex.: bumpe
+#     a versão, rode `npm run dist`, guarde o release/ resultante.
+#  2. sirva a pasta release/ por HTTP:  npx serve release -l 8770
+#  3. rode o app com a versão ANTIGA e o teste ligado:
+#       cross-env TORRE_UPDATE_DEV=1 npm run app
+#  4. o updater vai achar a versão nova no servidor local e disparar o modal.
+provider: generic
+url: http://127.0.0.1:8770

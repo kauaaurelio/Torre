@@ -1,0 +1,113 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+  padding: var(--spacing-8);
+  min-height: 100%;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+.title {
+  font-family: var(--font-display);
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-primary);
+}
+.desc {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+  max-width: var(--container-md);
+}
+
+.painel {
+  padding: var(--spacing-5);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-base);
+  border-radius: var(--radius-lg);
+}
+
+/* ---------- Controles ---------- */
+.controles {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+  flex-wrap: wrap;
+}
+.controlesInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+.campNome {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+}
+
+/* ---------- Métricas ---------- */
+.metricas {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--spacing-3);
+}
+.metrica {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  padding: var(--spacing-4);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-base);
+  border-radius: var(--radius-md);
+}
+.metricaValor {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+  line-height: 1.1;
+}
+.metricaValor[data-destaque] {
+  color: var(--color-success);
+}
+.metricaNota {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+/* ---------- A fita grande ---------- */
+.fitaCartao {
+  padding: var(--spacing-6);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-base);
+  border-radius: var(--radius-lg);
+}
+.fitaGrande {
+  --module-size: var(--spacing-3);
+}
+
+/* ---------- Legenda ---------- */
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-5);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.legendaItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+.legendaN {
+  color: var(--color-text-tertiary);
+  font-size: var(--text-xs);
+}

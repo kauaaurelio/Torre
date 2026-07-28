@@ -1,0 +1,209 @@
+/* ---------- Switcher de estados (temporário, para revisão) ---------- */
+.dev {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  border: 1px dashed var(--color-border-base);
+  border-radius: var(--radius-md);
+}
+.devBtns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+}
+.devBtn {
+  padding: var(--spacing-1) var(--spacing-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  background: transparent;
+  border: 1px solid var(--color-border-base);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition-colors);
+}
+.devBtn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-hover);
+}
+.devBtn[data-ativo] {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+/* ---------- Estado vazio ---------- */
+.vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-16) var(--spacing-8);
+  border: 1px dashed var(--color-border-base);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-secondary);
+  text-align: center;
+}
+.vazioIcone {
+  display: inline-flex;
+  color: var(--color-text-tertiary);
+  transform: scale(1.4);
+  margin-bottom: var(--spacing-2);
+}
+.vazioTitulo {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+.vazioTexto {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+  max-width: var(--container-sm);
+}
+.vazioAcao {
+  margin-top: var(--spacing-3);
+}
+
+/* ---------- Estado de erro ---------- */
+.erro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-16) var(--spacing-8);
+  border: 1px solid var(--color-error-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-error-light);
+  text-align: center;
+}
+.erroIcone {
+  display: inline-flex;
+  color: var(--color-error);
+  transform: scale(1.4);
+  margin-bottom: var(--spacing-2);
+}
+.erroTitulo {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+}
+.erroTexto {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  max-width: var(--container-sm);
+}
+
+/* ---------- Skeleton (estático — nada pulsa além da fita e do LED) ---------- */
+.skel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+.skelBarra {
+  height: var(--spacing-8);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- Badge de status (sempre ícone + rótulo, nunca só cor) ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1) var(--spacing-2);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-base);
+  white-space: nowrap;
+}
+.badgeIcone {
+  display: inline-flex;
+}
+.badge[data-tone='success'] {
+  color: var(--color-success);
+  background: var(--color-success-light);
+  border-color: var(--color-success-border);
+}
+.badge[data-tone='error'] {
+  color: var(--color-error);
+  background: var(--color-error-light);
+  border-color: var(--color-error-border);
+}
+.badge[data-tone='warning'] {
+  color: var(--color-warning);
+  background: var(--color-warning-light);
+  border-color: var(--color-warning-border);
+}
+.badge[data-tone='info'] {
+  color: var(--color-info);
+  background: var(--color-info-light);
+  border-color: var(--color-info-border);
+}
+.badge[data-tone='neutral'] {
+  color: var(--color-text-tertiary);
+  background: var(--color-bg-tertiary);
+}
+
+/* ---------- Botões compartilhados ---------- */
+.botao,
+.botaoPrimario,
+.botaoFantasma {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition-colors);
+}
+.botaoPrimario {
+  padding: var(--spacing-3) var(--spacing-5);
+  background: var(--color-primary);
+  color: var(--color-text-on-primary);
+  border: 1px solid var(--color-primary);
+}
+.botaoPrimario:hover {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+.botaoPrimario:disabled {
+  background: var(--color-neutral-700);
+  border-color: var(--color-neutral-700);
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+.botao {
+  padding: var(--spacing-2) var(--spacing-4);
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-base);
+}
+.botao:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-hover);
+  background: var(--color-bg-tertiary);
+}
+.botaoFantasma {
+  padding: var(--spacing-2) var(--spacing-3);
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid transparent;
+}
+.botaoFantasma:hover {
+  color: var(--color-text-primary);
+  background: var(--color-bg-tertiary);
+}

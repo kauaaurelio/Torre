@@ -1,0 +1,27 @@
+# dependências
+/node_modules
+
+# build Next
+/.next
+/out
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+# build desktop (Electron): worker empacotado, instalador NSIS e logs de boot
+/dist
+/release
+torre-electron.log
+release-build*.log
+.torre-autostart
+
+# ambiente e segredos
+.env
+.env.*
+
+# sessão do Baileys, banco local e provas de opt-in — nunca versionar
+/.baileys
+/data
+/backups
+
+.DS_Store

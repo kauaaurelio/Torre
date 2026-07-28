@@ -1,0 +1,84 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-5);
+  height: 100%;
+  padding: 0 var(--spacing-6);
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border-base);
+}
+
+/* Sessão — LED + rótulo + número. O número é mono, tabular. */
+.session {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex-shrink: 0;
+}
+.sessionText {
+  display: flex;
+  flex-direction: column;
+  line-height: var(--leading-tight);
+}
+.sessionState {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+}
+.sessionMeta {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+}
+
+.divider {
+  width: 1px;
+  height: var(--spacing-8);
+  background: var(--color-border-base);
+  flex-shrink: 0;
+}
+
+/* Campanha — cabeçalho + fita condensada + contador */
+.campaign {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.campaignHead {
+  display: flex;
+  flex-direction: column;
+  line-height: var(--leading-tight);
+  flex-shrink: 0;
+}
+.campaignName {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+/* A fita vira tira de uma linha: altura de um módulo, sobra é cortada.
+   A versão que quebra em várias linhas mora na tela Fila. */
+.stripWrap {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: var(--module-size);
+  overflow: hidden;
+}
+
+.counter {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Estado vazio: nenhuma campanha em voo */
+.campaignEmpty {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+}

@@ -1,0 +1,364 @@
+/* ============================================================
+   TORRE — globals.css
+   Painel de disparo WhatsApp (rota QR / Baileys)
+
+   INVARIANTE #1: nenhum valor de cor, fonte, espaçamento, sombra,
+   raio, z-index, duração ou curva escrito direto no componente.
+   Tudo referencia variável daqui.
+
+   CONVENÇÃO DESTE PROJETO: tema ESCURO é o padrão (:root).
+   É console de operação, usado por horas seguidas olhando fila.
+   O tema claro vive em [data-theme="light"] — inversão do usual.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* ---------- PRIMÁRIA — âmbar de sinal ----------
+     A lâmpada do painel. Tudo que está em voo. */
+  --color-primary:        #E9A13B;
+  --color-primary-hover:  #F2B155;
+  --color-primary-active: #CE8A2A;
+  --color-primary-light:  #3A2B12;   /* tinta de fundo no escuro */
+  --color-primary-subtle: #241A0B;
+
+  /* ---------- SECUNDÁRIA — azul esmalte ----------
+     A chapa do equipamento. Agendado, ocioso, informativo. */
+  --color-secondary:       #5C8C99;
+  --color-secondary-hover: #6FA1AE;
+  --color-secondary-light: #16262A;
+
+  /* ---------- NEUTROS — grafite morno ----------
+     Escala 50 (papel) → 950 (caixa). Espinha dorsal do projeto. */
+  --color-neutral-50:  #F6F2E9;
+  --color-neutral-100: #E7E1D4;
+  --color-neutral-200: #CFC7B6;
+  --color-neutral-300: #ADA495;
+  --color-neutral-400: #857D6E;
+  --color-neutral-500: #635C51;
+  --color-neutral-600: #4B453C;
+  --color-neutral-700: #38332C;
+  --color-neutral-800: #27231E;
+  --color-neutral-900: #1B1815;
+  --color-neutral-950: #100E0C;
+
+  /* ---------- SEMÂNTICAS ----------
+     ATENÇÃO: warning e primary são vizinhos no espectro.
+     Todo estado carrega ÍCONE + RÓTULO, nunca só cor. */
+  --color-success:        #6FBF73;   /* fósforo — entregue */
+  --color-success-light:  #16241A;
+  --color-success-border: #2E4A32;
+
+  --color-error:          #D9503F;   /* sinal — falha, bloqueio */
+  --color-error-light:    #2A1512;
+  --color-error-border:   #55231D;
+  --color-danger:         var(--color-error);  /* alias: exclusão/perigo = vermelho de sinal */
+
+  --color-warning:        #E3C64A;   /* mais claro e frio que o âmbar */
+  --color-warning-light:  #2A2411;
+  --color-warning-border: #4F4520;
+
+  --color-info:           #5C8C99;
+  --color-info-light:     #16262A;
+  --color-info-border:    #2C4A52;
+
+  /* ---------- SUPERFÍCIES ---------- */
+  --color-bg-primary:   #131110;
+  --color-bg-secondary: #1C1916;
+  --color-bg-tertiary:  #262119;
+  --color-bg-elevated:  #2E2921;
+  --color-bg-overlay:   rgba(10, 9, 7, .72);
+
+  /* ---------- TEXTO ---------- */
+  --color-text-primary:    #F1EADB;   /* papel telex */
+  --color-text-secondary:  #B3AA98;
+  --color-text-tertiary:   #857D6E;
+  --color-text-disabled:   #5A5449;
+  --color-text-on-primary: #1A1409;
+
+  /* ---------- BORDAS ---------- */
+  --color-border-base:  #322C24;
+  --color-border-hover: #453D31;
+  --color-border-focus: #E9A13B;
+  --color-border-error: #D9503F;
+
+  /* ---------- TIPOGRAFIA ---------- */
+  --font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --font-body:    'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:    'IBM Plex Mono', ui-monospace, monospace;
+
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+  --text-4xl:  2.25rem;
+  --text-5xl:  3rem;
+  --text-6xl:  3.75rem;
+
+  --tracking-label: .08em;   /* etiqueta de painel, em Barlow caixa alta */
+  --leading-tight:  1.15;
+  --leading-normal: 1.5;
+  --leading-loose:  1.7;
+
+  /* ---------- PESOS ---------- */
+  --weight-normal:   400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* ---------- ESPAÇAMENTO — escala de 4px ---------- */
+  --spacing-1:  0.25rem;
+  --spacing-2:  0.5rem;
+  --spacing-3:  0.75rem;
+  --spacing-4:  1rem;
+  --spacing-5:  1.25rem;
+  --spacing-6:  1.5rem;
+  --spacing-8:  2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+  --spacing-24: 6rem;
+  --spacing-32: 8rem;
+
+  /* ---------- LAYOUT ---------- */
+  --section-padding-y: var(--spacing-8);
+  --section-padding-x: var(--spacing-8);   /* escala desktop */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1440px;
+
+  --sidebar-width:          240px;
+  --sidebar-width-collapsed: 64px;
+  --statusbar-height:       56px;   /* a fita, fixa no topo */
+
+  /* Assinatura: a fita de módulos (QR) */
+  --module-size:     10px;
+  --module-gap:      2px;
+  --module-radius:   var(--radius-none);
+
+  /* ---------- RAIO ----------
+     Escala curta de propósito: painel de equipamento, não app de banco. */
+  --radius-none: 0;
+  --radius-sm:   2px;
+  --radius-md:   4px;
+  --radius-lg:   6px;
+  --radius-xl:   10px;
+  --radius-2xl:  16px;
+  --radius-full: 9999px;
+
+  /* ---------- SOMBRA ----------
+     No escuro, sombra preta some. Cada nível carrega também um
+     realce interno de 1px no topo — é o que dá relevo de chapa. */
+  --shadow-xs:    0 1px 2px rgba(0,0,0,.40);
+  --shadow-sm:    0 1px 3px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.03);
+  --shadow-md:    0 4px 8px rgba(0,0,0,.50), inset 0 1px 0 rgba(255,255,255,.04);
+  --shadow-lg:    0 10px 20px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.05);
+  --shadow-xl:    0 18px 32px rgba(0,0,0,.60), inset 0 1px 0 rgba(255,255,255,.05);
+  --shadow-2xl:   0 28px 56px rgba(0,0,0,.65);
+  --shadow-inner: inset 0 2px 4px rgba(0,0,0,.50);
+  --shadow-none:  none;
+
+  /* Brilho de lâmpada — só para o módulo em voo e o LED de conexão */
+  --glow-signal:  0 0 0 1px var(--color-primary), 0 0 10px rgba(233,161,59,.45);
+  --glow-live:    0 0 8px rgba(111,191,115,.55);
+
+  /* ---------- MOVIMENTO ---------- */
+  --duration-instant: 80ms;
+  --duration-fast:    120ms;
+  --duration-normal:  200ms;
+  --duration-slow:    300ms;
+  --duration-slower:  400ms;
+
+  --easing-out:    cubic-bezier(.16, 1, .3, 1);
+  --easing-in:     cubic-bezier(.7, 0, .84, 0);
+  --easing-in-out: cubic-bezier(.65, 0, .35, 1);
+  --easing-spring: cubic-bezier(.34, 1.56, .64, 1);
+
+  --stagger: 60ms;
+
+  --transition-colors: color var(--duration-fast) var(--easing-out),
+                       background-color var(--duration-fast) var(--easing-out),
+                       border-color var(--duration-fast) var(--easing-out);
+  --transition-transform: transform var(--duration-fast) var(--easing-out);
+  --transition-shadow: box-shadow var(--duration-normal) var(--easing-out);
+
+  /* ---------- Z-INDEX ---------- */
+  --z-dropdown: 10;
+  --z-sticky:   20;
+  --z-navbar:   30;
+  --z-overlay:  40;
+  --z-modal:    50;
+  --z-toast:    60;
+  --z-tooltip:  70;
+}
+
+/* ============================================================
+   TEMA CLARO — inversão do usual (ver convenção no topo).
+   Só cor e sombra mudam. Escala, raio e espaçamento permanecem.
+   ============================================================ */
+[data-theme="light"] {
+  --color-primary-light:  #FBEFD9;
+  --color-primary-subtle: #FDF7EC;
+
+  --color-secondary-light: #E4EEF1;
+
+  --color-success-light:  #E9F5EA;
+  --color-success-border: #B4DDB7;
+  --color-error-light:    #FBE9E6;
+  --color-error-border:   #EFB5AC;
+  --color-warning-light:  #FAF3D8;
+  --color-warning-border: #E0CE84;
+  --color-info-light:     #E4EEF1;
+  --color-info-border:    #AFCBD2;
+
+  --color-bg-primary:   #F6F2E9;
+  --color-bg-secondary: #EFEADD;
+  --color-bg-tertiary:  #E7E1D4;
+  --color-bg-elevated:  #FFFFFF;
+  --color-bg-overlay:   rgba(27, 24, 21, .55);
+
+  --color-text-primary:   #1B1815;
+  --color-text-secondary: #4B453C;
+  --color-text-tertiary:  #635C51;
+  --color-text-disabled:  #ADA495;
+
+  --color-border-base:  #D8D0BF;
+  --color-border-hover: #BFB6A2;
+
+  --shadow-xs:    0 1px 2px rgba(27,24,21,.06);
+  --shadow-sm:    0 1px 3px rgba(27,24,21,.10);
+  --shadow-md:    0 4px 8px rgba(27,24,21,.12);
+  --shadow-lg:    0 10px 20px rgba(27,24,21,.14);
+  --shadow-xl:    0 18px 32px rgba(27,24,21,.16);
+  --shadow-2xl:   0 28px 56px rgba(27,24,21,.18);
+  --shadow-inner: inset 0 2px 4px rgba(27,24,21,.08);
+
+  --glow-signal: 0 0 0 1px var(--color-primary);
+  --glow-live:   0 0 0 1px var(--color-success);
+}
+
+/* ============================================================
+   BASE
+   EXCEÇÃO AO PADRÃO: este projeto é DESKTOP-FIRST.
+   O estilo base é desktop, sem media query. Ferramenta de operação
+   rodando localmente num PC — não existe contexto móvel de uso.
+
+   Breakpoints (media query não aceita var — documentados aqui):
+   sm 640 · md 768 · lg 1024 · xl 1280 · 2xl 1536
+   Piso de construção: 1280. Testar em 1280 e 1440.
+
+   ÚNICA RESSALVA: `.fita` (barra de status) e a tela de relatório
+   continuam legíveis abaixo de 768 — são as duas que dá vontade de
+   olhar do celular com a campanha rodando. Nada além disso desce.
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  color-scheme: dark;
+}
+[data-theme="light"] { color-scheme: light; }
+
+body {
+  margin: 0;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-600, var(--weight-semibold));
+  line-height: var(--leading-tight);
+  margin: 0;
+}
+
+/* Etiqueta de painel — o tom de voz da interface */
+.label {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+
+/* Todo número, telefone, contador e log é monoespaçado. */
+.numeric, td.numeric, .phone, .counter {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   ASSINATURA — a fita de módulos
+   Um quadrado por contato da campanha. Progresso e mapa ao mesmo tempo.
+   ============================================================ */
+.fita {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--module-gap);
+  align-content: flex-start;
+}
+
+.fita__modulo {
+  width: var(--module-size);
+  height: var(--module-size);
+  border-radius: var(--module-radius);
+  background: var(--color-neutral-700);
+  transition: var(--transition-colors), var(--transition-shadow);
+}
+
+.fita__modulo[data-estado="enviando"] {
+  background: var(--color-primary);
+  box-shadow: var(--glow-signal);
+  animation: pulso-sinal 1.4s var(--easing-in-out) infinite;
+}
+.fita__modulo[data-estado="entregue"] { background: var(--color-success); }
+.fita__modulo[data-estado="falhou"]   { background: var(--color-error); }
+.fita__modulo[data-estado="optout"] {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--color-neutral-600);
+}
+
+@keyframes pulso-sinal {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: .55; }
+}
+
+/* LED de conexão da sessão */
+.led {
+  width: var(--spacing-2);
+  height: var(--spacing-2);
+  border-radius: var(--radius-full);
+  background: var(--color-neutral-600);
+}
+.led[data-estado="conectado"]  { background: var(--color-success); box-shadow: var(--glow-live); }
+.led[data-estado="conectando"] { background: var(--color-warning); animation: pulso-sinal 1.4s var(--easing-in-out) infinite; }
+.led[data-estado="caiu"]       { background: var(--color-error); }
+
+/* ============================================================
+   MOVIMENTO REDUZIDO
+   Reduzir, não zerar: cai o deslocamento e o pulso, fica o feedback.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .fita__modulo[data-estado="enviando"],
+  .led[data-estado="conectando"] { animation: none; }
+
+  .reveal { animation: none; transform: none; }
+
+  button, a, input { transition: var(--transition-colors); }
+}

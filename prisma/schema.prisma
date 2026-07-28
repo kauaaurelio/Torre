@@ -1,0 +1,135 @@
+// Torre — camada de dados local (SQLite). Um operador, uma máquina.
+// SQLite não tem enums nativos: os campos de estado são String validada na API.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Base própria. `telefone` é a forma normalizada (55 + DDD + número) e é a
+// chave de deduplicação. `tipo` separa o que dá pra disparar (mobile) do que
+// não dá (fixo/invalido) — WhatsApp só existe em celular.
+model Contato {
+  id          String    @id @default(cuid())
+  nome        String
+  telefone    String    @unique
+  telefoneRaw String
+  tipo        String // 'mobile' | 'fixo' | 'invalido'
+  segmentos   String    @default("") // CSV de segmentos
+  cidade      String? // personalização: cidade do negócio (constante por lote)
+  nicho       String? // personalização: nicho pesquisado (constante por lote)
+  empresa     String? // personalização: nome do negócio (default = nome)
+  optinData   String? // ISO curto, ex '2026-05-14'
+  optinOrigem String?
+  optinPor    String?
+  status      String    @default("ativo") // 'ativo' | 'optout'
+  optoutEm    DateTime?
+  criadoEm    DateTime  @default(now())
+  envios      Envio[]
+
+  @@index([status])
+  @@index([tipo])
+}
+
+// Um disparo. `template` guarda o spintax {a|b} + {{variavel}}; a variação por
+// contato é materializada em cada Envio no momento do enfileiramento.
+// `numeroId` null = rodízio entre os chips conectados; setado = número fixo.
+model Campanha {
+  id          String    @id @default(cuid())
+  nome        String
+  segmento    String? // null = base inteira
+  template    String
+  status      String    @default("rascunho") // rascunho|rodando|pausada|concluida|erro
+  total       Int       @default(0)
+  motivoPausa String?
+  numeroId    String? // null = rodízio; setado = chip fixo
+  numero      Sessao?   @relation(fields: [numeroId], references: [id], onDelete: SetNull)
+  criadaEm    DateTime  @default(now())
+  concluidaEm DateTime?
+  envios      Envio[]
+
+  @@index([status])
+}
+
+// Item da fila: um contato x uma campanha, com o texto já variado.
+// `sessaoId`: chip que enviou/enviará. Fixo -> setado no enfileiramento;
+// rodízio -> null até o worker escolher um chip conectado na hora do envio.
+model Envio {
+  id         String    @id @default(cuid())
+  campanhaId String
+  campanha   Campanha  @relation(fields: [campanhaId], references: [id], onDelete: Cascade)
+  contatoId  String
+  contato    Contato   @relation(fields: [contatoId], references: [id], onDelete: Cascade)
+  sessaoId   String?
+  sessao     Sessao?   @relation(fields: [sessaoId], references: [id], onDelete: SetNull)
+  texto      String
+  status     String    @default("fila") // fila|enviando|entregue|falhou|optout
+  erro       String?
+  tentativas Int       @default(0)
+  ordem      Int       @default(0)
+  enviadoEm  DateTime?
+  criadoEm   DateTime  @default(now())
+
+  @@index([campanhaId, status])
+  @@index([sessaoId, status])
+  @@index([status])
+}
+
+// Freios globais (singleton id=1) + defaults de freio por número, copiados ao
+// criar uma Sessao nova. janela e opt-out valem pra todos os chips.
+model Config {
+  id             Int    @id @default(1)
+  janelaIni      String @default("08:00")
+  janelaFim      String @default("20:00")
+  palavrasOptout String @default("sair,parar,descadastrar")
+  // defaults copiados pra cada chip novo:
+  intMin         Int    @default(40)
+  intMax         Int    @default(110)
+  rampa          String @default("30,50,80,150")
+  breakerLimite  Int    @default(5)
+  loteMin        Int    @default(7)
+  loteMax        Int    @default(13)
+  pausaMin       Int    @default(30) // minutos
+  pausaMax       Int    @default(60) // minutos
+}
+
+// Um chip pareado. Deixou de ser singleton: agora N linhas, uma por número.
+// O worker escreve o estado; o painel lê. `comando` é o canal painel -> worker.
+// Os freios são POR NÚMERO — cada chip tem sua reputação, sua rampa e seu teto.
+model Sessao {
+  id            String     @id @default(cuid())
+  rotulo        String     @default("Chip")
+  estado        String     @default("sem_sessao") // sem_sessao|gerando_qr|aguardando_leitura|conectando|conectado|caiu|breaker
+  numero        String?
+  qr            String? // data URL do QR
+  comando       String? // 'conectar' | 'desconectar' | 'remover' | null
+  motivo        String? // texto de queda/erro
+  // freios por número:
+  intMin        Int        @default(40)
+  intMax        Int        @default(110)
+  rampa         String     @default("30,50,80,150")
+  rampaDegrau   Int        @default(0)
+  breakerLimite Int        @default(5)
+  // descanso em lote: a cada N disparos (aleatório loteMin–loteMax) o chip
+  // pausa por M minutos (aleatório pausaMin–pausaMax). Rajada + descanso imita
+  // humano; enviar sem parar é o que queima o número.
+  loteMin       Int        @default(7)
+  loteMax       Int        @default(13)
+  pausaMin      Int        @default(30)
+  pausaMax      Int        @default(60)
+  criadaEm      DateTime   @default(now())
+  atualizadoEm  DateTime   @updatedAt
+  campanhas     Campanha[]
+  envios        Envio[]
+}
+
+// Processo worker (singleton id=1). O heartbeat é do PROCESSO, não da sessão:
+// um só worker gerencia todos os chips. Sem batida recente (<20s) o painel
+// mostra "worker offline".
+model Worker {
+  id        Int       @id @default(1)
+  heartbeat DateTime?
+}

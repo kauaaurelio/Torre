@@ -1,0 +1,187 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+  padding: var(--spacing-8);
+  min-height: 100%;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+.title {
+  font-family: var(--font-display);
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-primary);
+}
+.desc {
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
+}
+
+.painel {
+  padding: var(--spacing-5);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-base);
+  border-radius: var(--radius-lg);
+}
+
+/* ---------- Herói: a taxa de entrega ---------- */
+.heroi {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: var(--spacing-8);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-base);
+  border-radius: var(--radius-lg);
+}
+.heroiTopo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+}
+.heroiSub {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+}
+.heroiValor {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-1);
+}
+.taxaNum {
+  font-size: var(--text-6xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-success);
+  line-height: 1;
+}
+.taxaPct {
+  font-family: var(--font-mono);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-semibold);
+  color: var(--color-success);
+}
+.medidor {
+  height: var(--spacing-3);
+  background: var(--color-neutral-800);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.medidorPreenchido {
+  block-size: 100%;
+  background: var(--color-success);
+  border-radius: var(--radius-full);
+}
+
+/* ---------- Stat tiles ---------- */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-3);
+}
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  padding: var(--spacing-5);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-base);
+  border-radius: var(--radius-md);
+}
+.tileValor {
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+.tileValor[data-tone='success'] {
+  color: var(--color-success);
+}
+.tileValor[data-tone='error'] {
+  color: var(--color-error);
+}
+.tileValor[data-tone='neutral'] {
+  color: var(--color-text-secondary);
+}
+
+/* ---------- Composição (barra empilhada) ---------- */
+.composicao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding: var(--spacing-6);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-base);
+  border-radius: var(--radius-lg);
+}
+.compHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-4);
+}
+.compTotal {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+}
+/* vão de 2px de superfície entre as faixas; pontas arredondadas */
+.barra {
+  display: flex;
+  gap: var(--module-gap);
+  height: var(--spacing-6);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.segmento {
+  block-size: 100%;
+  min-inline-size: var(--radius-md);
+}
+.segmento[data-faixa='entregue'] {
+  background: var(--color-success);
+}
+.segmento[data-faixa='falhou'] {
+  background: var(--color-error);
+}
+.segmento[data-faixa='optout'] {
+  background: var(--color-neutral-400);
+}
+.segmento[data-faixa='pendente'] {
+  background: var(--color-neutral-700);
+}
+
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.legendaItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+.legendaN {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+}
+
+/* Consulta em largura estreita (uma das telas olhadas do celular) */
+@media (max-width: 768px) {
+  .tiles {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .taxaNum {
+    font-size: var(--text-5xl);
+  }
+}
