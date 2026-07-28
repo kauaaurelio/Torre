@@ -1,0 +1,57 @@
+name: release
+
+# Publica a release e liga o auto-update SEM você rodar dist:publish na mão.
+# Dispara quando o package.json muda no main (ou seja: você bumpa a versão e
+# commita). Se a versão já tiver release publicada, o job pula — não duplica.
+# Também dá pra rodar na mão pelo botão "Run workflow" na aba Actions.
+on:
+  push:
+    branches: [main]
+    paths: ['package.json']
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: windows-latest
+    permissions:
+      contents: write # o GITHUB_TOKEN precisa disso pra criar release + tag
+    env:
+      # O next build não conecta no banco (rotas são force-dynamic), mas o
+      # Prisma quer a var presente. Dummy — não existe arquivo, não precisa.
+      DATABASE_URL: 'file:./ci.db'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Ler versão do package.json
+        id: ver
+        shell: bash
+        run: echo "v=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: A release desta versão já existe?
+        id: check
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "v${{ steps.ver.outputs.v }}" >/dev/null 2>&1; then
+            echo "Release v${{ steps.ver.outputs.v }} já existe — pulando."
+            echo "existe=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Release v${{ steps.ver.outputs.v }} não existe — vai publicar."
+            echo "existe=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Instalar dependências
+        if: steps.check.outputs.existe == 'false'
+        run: npm ci
+
+      - name: Build + publicar (electron-builder)
+        if: steps.check.outputs.existe == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run dist:publish
