@@ -327,6 +327,8 @@ async function concluiCampanhas() {
 // Tipo do chip com todos os freios (o que despacha precisa saber).
 type SessaoFreios = {
   id: string;
+  rotulo: string;
+  numero: string | null;
   rampa: string;
   rampaDegrau: number;
   intMin: number;
@@ -457,7 +459,12 @@ async function despacha(
     // double-send se dois caminhos mirarem o mesmo envio no mesmo tick.
     const claim = await prisma.envio.updateMany({
       where: { id: envio.id, status: 'fila' },
-      data: { status: 'enviando', sessaoId: sessao.id },
+      data: {
+        status: 'enviando',
+        sessaoId: sessao.id,
+        // Snapshot durável de quem enviou — sobrevive à remoção do chip.
+        remetente: sessao.numero ?? sessao.rotulo,
+      },
     });
     if (claim.count === 0) return;
 

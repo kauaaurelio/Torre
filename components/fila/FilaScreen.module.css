@@ -111,3 +111,104 @@
   color: var(--color-text-tertiary);
   font-size: var(--text-xs);
 }
+
+/* ---------- Aviso: sem número conectado ---------- */
+.avisoSemNumero {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  background: color-mix(in srgb, var(--color-warning) 10%, var(--color-bg-secondary));
+  border: 1px solid color-mix(in srgb, var(--color-warning) 40%, var(--color-border-base));
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-loose);
+}
+.avisoSemNumero svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--color-warning);
+  margin-top: 1px;
+}
+.avisoSemNumero strong {
+  color: var(--color-text-primary);
+}
+.avisoLink {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---------- Registro da fila (quem enviou -> pra quem) ---------- */
+.detalhe {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+.detalheHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+.detalheDesc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  max-width: var(--container-md);
+}
+.detalheVazio {
+  font-size: var(--text-sm);
+  color: var(--color-text-tertiary);
+}
+.tabelaWrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border-base);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-secondary);
+}
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+.tabela thead th {
+  text-align: left;
+  padding: var(--spacing-3) var(--spacing-4);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  border-bottom: 1px solid var(--color-border-base);
+  white-space: nowrap;
+}
+.tabela tbody td {
+  padding: var(--spacing-3) var(--spacing-4);
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border-base);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.tabela tbody tr:last-child td {
+  border-bottom: none;
+}
+.tabela tbody tr:hover {
+  background: var(--color-bg-tertiary);
+}
+.estadoCel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+.celContato {
+  color: var(--color-text-primary);
+  font-weight: var(--weight-medium);
+  max-width: 22rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.celRemetente {
+  color: var(--color-text-primary);
+}

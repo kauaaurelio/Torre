@@ -65,6 +65,10 @@ model Envio {
   contato    Contato   @relation(fields: [contatoId], references: [id], onDelete: Cascade)
   sessaoId   String?
   sessao     Sessao?   @relation(fields: [sessaoId], references: [id], onDelete: SetNull)
+  // Snapshot do chip que enviou (número/rótulo), gravado no disparo. Sobrevive à
+  // remoção do chip — `sessaoId` vira null (onDelete: SetNull), mas o registro de
+  // "qual celular enviou" tem que permanecer no relatório da fila.
+  remetente  String?
   texto      String
   status     String    @default("fila") // fila|enviando|entregue|falhou|optout
   erro       String?

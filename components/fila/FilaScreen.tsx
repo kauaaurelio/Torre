@@ -28,8 +28,29 @@ interface FilaData {
     rampa: number[];
     tetoHoje: number;
     enviadosHoje: number;
+    numerosConectados: number;
+    rodizio: boolean;
   };
+  registros?: Registro[];
 }
+
+interface Registro {
+  status: EstadoModulo;
+  enviadoEm: string | null;
+  erro: string | null;
+  remetente: string | null;
+  contato: string;
+  telefone: string;
+  cidade: string | null;
+}
+
+const STATUS_ROTULO: Record<EstadoModulo, string> = {
+  fila: 'Na fila',
+  enviando: 'Enviando',
+  entregue: 'Entregue',
+  falhou: 'Falhou',
+  optout: 'Opt-out',
+};
 
 const LEGENDA: { estado: EstadoModulo; rotulo: string }[] = [
   { estado: 'fila', rotulo: 'Na fila' },
@@ -89,6 +110,10 @@ export default function FilaScreen() {
   const taxa = enviados ? Math.round(((c?.entregue ?? 0) / enviados) * 100) : 0;
   const breaker =
     camp?.status === 'pausada' && (camp.motivoPausa ?? '').startsWith('Circuit breaker');
+  // Sem chip conectado servindo, os freios são só o template do Config — nada
+  // dispara. Não mostrar número fantasma; avisar.
+  const semNumero = !!camp && (data?.freios?.numerosConectados ?? 0) === 0;
+  const registros = data?.registros ?? [];
 
   return (
     <div className={styles.screen}>
@@ -175,6 +200,22 @@ export default function FilaScreen() {
             />
           )}
 
+          {semNumero && !breaker && (
+            <div className={styles.avisoSemNumero}>
+              <Icons.alert />
+              <div>
+                <strong>Nenhum número conectado.</strong> A fila não anda sem um
+                chip pareado — os {registros.filter((r) => r.status === 'fila').length}{' '}
+                contatos em fila ficam parados. Vá em{' '}
+                <Link href="/conexao" className={styles.avisoLink}>
+                  Conexão
+                </Link>{' '}
+                e conecte um chip. Os valores de intervalo e rampa abaixo são só o
+                padrão até um número entrar.
+              </div>
+            </div>
+          )}
+
           <div className={styles.metricas}>
             <Metrica rotulo="Progresso" valor={`${concluidos}/${camp.total}`} />
             <Metrica rotulo="Taxa de entrega" valor={`${taxa}%`} destaque />
@@ -210,6 +251,58 @@ export default function FilaScreen() {
               </li>
             ))}
           </ul>
+
+          <div className={styles.detalhe}>
+            <div className={styles.detalheHead}>
+              <p className="label">Registro da fila</p>
+              <p className={styles.detalheDesc}>
+                Quem enviou (o chip) e para qual número e lugar. O remetente é
+                gravado no disparo — permanece mesmo que o chip seja removido.
+              </p>
+            </div>
+            {registros.length === 0 ? (
+              <p className={styles.detalheVazio}>Nenhum contato nesta campanha.</p>
+            ) : (
+              <div className={styles.tabelaWrap}>
+                <table className={styles.tabela}>
+                  <thead>
+                    <tr>
+                      <th>Estado</th>
+                      <th>Contato</th>
+                      <th>Número</th>
+                      <th>Lugar</th>
+                      <th>Enviado por</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {registros.map((reg, i) => (
+                      <tr key={i}>
+                        <td>
+                          <span className={styles.estadoCel}>
+                            <span
+                              className="fita__modulo"
+                              {...(reg.status !== 'fila'
+                                ? { 'data-estado': reg.status }
+                                : {})}
+                            />
+                            {STATUS_ROTULO[reg.status]}
+                          </span>
+                        </td>
+                        <td className={styles.celContato} title={reg.contato}>
+                          {reg.contato}
+                        </td>
+                        <td className="numeric">{reg.telefone}</td>
+                        <td>{reg.cidade || '—'}</td>
+                        <td className={`numeric ${styles.celRemetente}`}>
+                          {reg.remetente ?? '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>

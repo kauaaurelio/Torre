@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma, garanteSingletons } from '@/lib/prisma';
 import { campanhaRelevante, resumoCampanha } from '@/lib/consultas';
+import { normalizaTelefone } from '@/lib/telefone';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +21,11 @@ export async function GET() {
   const chips = await prisma.sessao.findMany();
   const servindo = camp.numeroId ? chips.filter((s) => s.id === camp.numeroId) : chips;
   const base = servindo.length ? servindo : chips;
+
+  // Número(s) que de fato podem disparar esta campanha AGORA (conectados). Sem
+  // nenhum, os freios abaixo são só o template do Config — nada sai. O display
+  // precisa dizer isso em vez de mostrar número fantasma.
+  const conectadosServindo = servindo.filter((s) => s.estado === 'conectado');
 
   const tetoDoChip = (s: { rampa: string; rampaDegrau: number }) => {
     const r = s.rampa.split(',').map(Number);
@@ -46,6 +52,33 @@ export async function GET() {
     },
   });
 
+  // Detalhe da fila: cada contato desta campanha, com quem enviou (o chip) e
+  // pra qual número/lugar. `remetente` é o snapshot durável gravado no disparo;
+  // se ainda em fila (ou registro antigo sem snapshot), cai no chip da relação.
+  const registrosRaw = await prisma.envio.findMany({
+    where: { campanhaId: camp.id },
+    orderBy: { ordem: 'asc' },
+    take: 500,
+    select: {
+      status: true,
+      enviadoEm: true,
+      remetente: true,
+      erro: true,
+      sessao: { select: { numero: true, rotulo: true } },
+      contato: { select: { nome: true, telefone: true, cidade: true } },
+    },
+  });
+  const registros = registrosRaw.map((e) => ({
+    status: e.status,
+    enviadoEm: e.enviadoEm,
+    erro: e.erro,
+    // Quem enviou: snapshot > chip da relação > null (ainda não enviado).
+    remetente: e.remetente ?? e.sessao?.numero ?? e.sessao?.rotulo ?? null,
+    contato: e.contato.nome,
+    telefone: normalizaTelefone(e.contato.telefone).exibicao,
+    cidade: e.contato.cidade,
+  }));
+
   return NextResponse.json({
     campanha: {
       id: resumo.id,
@@ -62,6 +95,10 @@ export async function GET() {
       rampa,
       tetoHoje,
       enviadosHoje,
+      // 0 = nenhum chip conectado servindo → o display não deve fingir freio real.
+      numerosConectados: conectadosServindo.length,
+      rodizio: camp.numeroId === null,
     },
+    registros,
   });
 }
