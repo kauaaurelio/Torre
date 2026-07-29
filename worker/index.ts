@@ -52,6 +52,35 @@ const rts = new Map<string, RT>();
 let rodizioProximoEm = 0; // quando o próximo disparo de rodízio pode sair
 let rodizioGiro = 0; // ponteiro de rotação (incrementa a cada disparo de rodízio)
 
+// --- diagnóstico de entrega (TEMPORÁRIO) ------------------------------------
+// O Torre marca "entregue" no ack do servidor (sendMessage resolveu), não no
+// recibo real. Isto cruza o key.id de cada envio com os recibos que o WhatsApp
+// devolve em messages.update, pra ver se a mensagem PASSA do "servidor aceitou"
+// (2) pro "chegou no aparelho" (3). Some quando o worker reinicia — é só p/ depurar.
+type ReciboUpdate = {
+  key?: { id?: string | null; remoteJid?: string | null } | null;
+  update?: { status?: number | null } | null;
+};
+const diagMsgs = new Map<string, { nome: string; telefone: string; sessaoId: string }>();
+const STATUS_NOME: Record<number, string> = {
+  0: 'ERRO',
+  1: 'PENDENTE',
+  2: 'SERVER_ACK · 1 tique (servidor aceitou)',
+  3: 'DELIVERY_ACK · 2 tiques (chegou no aparelho)',
+  4: 'READ · lido',
+  5: 'PLAYED',
+};
+function onRecibos(sessaoId: string, updates: ReciboUpdate[]) {
+  for (const u of updates) {
+    const st = u.update?.status;
+    if (st == null) continue;
+    const id = u.key?.id ?? '';
+    const alvo = diagMsgs.get(id);
+    const quem = alvo ? `${alvo.nome} (${alvo.telefone})` : u.key?.remoteJid ?? '?';
+    console.log(`[torre][diag] recibo ${sessaoId}: ${STATUS_NOME[st] ?? st} <- ${quem} [key=${id}]`);
+  }
+}
+
 function rt(sessaoId: string): RT {
   let r = rts.get(sessaoId);
   if (!r) {
@@ -119,6 +148,7 @@ async function iniciarSocket(sessaoId: string) {
     try {
       r.sock.ev.removeAllListeners('connection.update');
       r.sock.ev.removeAllListeners('messages.upsert');
+      r.sock.ev.removeAllListeners('messages.update');
       r.sock.end(undefined);
     } catch {}
     r.sock = null;
@@ -141,6 +171,9 @@ async function iniciarSocket(sessaoId: string) {
   r.sock.ev.on('creds.update', saveCreds);
   r.sock.ev.on('connection.update', (u) => onConexao(sessaoId, u));
   r.sock.ev.on('messages.upsert', onMensagens);
+  r.sock.ev.on('messages.update', (updates) =>
+    onRecibos(sessaoId, updates as unknown as ReciboUpdate[]),
+  );
 }
 
 async function onConexao(
@@ -482,6 +515,12 @@ async function despacha(
 
     try {
       const res = (await r.sock!.onWhatsApp(contato.telefone))?.[0];
+      const jidNum = res?.jid ? res.jid.split('@')[0].split(':')[0].replace(/\D/g, '') : '';
+      const colapsou = jidNum && jidNum !== contato.telefone.replace(/\D/g, '');
+      console.log(
+        `[torre][diag] ${sessao.id} onWhatsApp(${contato.telefone}) -> exists=${res?.exists} jid=${res?.jid ?? '—'}` +
+          (colapsou ? `  ⚠ JID DIFERE do consultado (${contato.telefone}->${jidNum}, 9º dígito?)` : ''),
+      );
       if (!res?.exists) {
         await prisma.envio.update({
           where: { id: envio.id },
@@ -494,14 +533,23 @@ async function despacha(
         });
         await registraFalha(sessao, r);
       } else {
-        await r.sock!.sendMessage(res.jid, { text: texto });
+        const enviado = await r.sock!.sendMessage(res.jid, { text: texto });
+        const keyId = enviado?.key?.id ?? '';
+        if (keyId)
+          diagMsgs.set(keyId, {
+            nome: contato.nome,
+            telefone: contato.telefone,
+            sessaoId: sessao.id,
+          });
         await prisma.envio.update({
           where: { id: envio.id },
           data: { status: 'entregue', enviadoEm: new Date() },
         });
         r.falhasSeguidas = 0;
         disparou = true;
-        console.log('[torre]', sessao.id, 'enviado ->', contato.nome);
+        console.log(
+          `[torre][diag] ${sessao.id} sendMessage OK -> ${contato.nome} | destinoJid=${res.jid} | key=${keyId}`,
+        );
       }
     } catch (e) {
       await prisma.envio.update({

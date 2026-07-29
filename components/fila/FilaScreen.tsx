@@ -35,6 +35,7 @@ interface FilaData {
 }
 
 interface Registro {
+  id: string;
   status: EstadoModulo;
   enviadoEm: string | null;
   erro: string | null;
@@ -65,6 +66,9 @@ export default function FilaScreen() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(false);
   const [agindo, setAgindo] = useState(false);
+  // Modais de exclusão: a fila inteira (a campanha) ou um número (um envio).
+  const [excluirFila, setExcluirFila] = useState(false);
+  const [registroExcluir, setRegistroExcluir] = useState<Registro | null>(null);
 
   const carregar = useCallback(async () => {
     try {
@@ -176,17 +180,28 @@ export default function FilaScreen() {
                 </Badge>
               )}
             </div>
-            {(camp.status === 'rodando' || camp.status === 'pausada') && (
+            <div className={styles.controlesAcoes}>
+              {(camp.status === 'rodando' || camp.status === 'pausada') && (
+                <button
+                  type="button"
+                  className={ui.botao}
+                  disabled={agindo}
+                  onClick={() => controle(camp.status === 'rodando' ? 'pausar' : 'retomar')}
+                >
+                  {camp.status === 'rodando' ? <Icons.pausa /> : <Icons.play />}
+                  {camp.status === 'rodando' ? 'Pausar' : 'Retomar'}
+                </button>
+              )}
               <button
                 type="button"
-                className={ui.botao}
+                className={styles.botaoPerigo}
                 disabled={agindo}
-                onClick={() => controle(camp.status === 'rodando' ? 'pausar' : 'retomar')}
+                onClick={() => setExcluirFila(true)}
               >
-                {camp.status === 'rodando' ? <Icons.pausa /> : <Icons.play />}
-                {camp.status === 'rodando' ? 'Pausar' : 'Retomar'}
+                <Icons.lixeira />
+                Excluir fila
               </button>
-            )}
+            </div>
           </div>
 
           {breaker && (
@@ -272,6 +287,7 @@ export default function FilaScreen() {
                       <th>Número</th>
                       <th>Lugar</th>
                       <th>Enviado por</th>
+                      <th className={styles.colAcao} aria-label="Ações" />
                     </tr>
                   </thead>
                   <tbody>
@@ -296,6 +312,26 @@ export default function FilaScreen() {
                         <td className={`numeric ${styles.celRemetente}`}>
                           {reg.remetente ?? '—'}
                         </td>
+                        <td className={styles.colAcao}>
+                          {reg.status === 'enviando' ? (
+                            <span
+                              className={styles.enviandoNota}
+                              title="Enviando agora — não dá pra remover no meio do disparo"
+                            >
+                              …
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              className={styles.botaoExcluir}
+                              onClick={() => setRegistroExcluir(reg)}
+                              aria-label={`Remover ${reg.contato} da fila`}
+                              title="Remover número da fila"
+                            >
+                              <Icons.lixeira />
+                            </button>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -305,6 +341,181 @@ export default function FilaScreen() {
           </div>
         </>
       )}
+
+      {excluirFila && camp && (
+        <ConfirmarExclusaoFila
+          nome={camp.nome}
+          total={camp.total}
+          onFechar={() => setExcluirFila(false)}
+          onExcluido={() => {
+            setExcluirFila(false);
+            carregar();
+          }}
+          campanhaId={camp.id}
+        />
+      )}
+
+      {registroExcluir && (
+        <ConfirmarRemoverNumero
+          registro={registroExcluir}
+          onFechar={() => setRegistroExcluir(null)}
+          onExcluido={() => {
+            setRegistroExcluir(null);
+            carregar();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function ConfirmarExclusaoFila({
+  nome,
+  total,
+  campanhaId,
+  onFechar,
+  onExcluido,
+}: {
+  nome: string;
+  total: number;
+  campanhaId: string;
+  onFechar: () => void;
+  onExcluido: () => void;
+}) {
+  const [excluindo, setExcluindo] = useState(false);
+  const [erroMsg, setErroMsg] = useState<string | null>(null);
+
+  async function confirmar() {
+    setExcluindo(true);
+    setErroMsg(null);
+    try {
+      const r = await fetch(`/api/campanhas/${campanhaId}`, { method: 'DELETE' });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        setErroMsg(d.erro ?? 'Falha ao excluir a fila.');
+        return;
+      }
+      onExcluido();
+    } catch {
+      setErroMsg('Falha de rede ao excluir.');
+    } finally {
+      setExcluindo(false);
+    }
+  }
+
+  return (
+    <div className={styles.overlay} role="dialog" aria-modal="true" aria-label="Excluir fila">
+      <div className={styles.modal}>
+        <div className={styles.modalHead}>
+          <h2 className={styles.modalTitulo}>Excluir a fila inteira?</h2>
+          <button type="button" className={ui.botaoFantasma} onClick={onFechar} aria-label="Fechar">
+            <Icons.x />
+          </button>
+        </div>
+
+        <p className={styles.modalTexto}>
+          A campanha <strong>{nome}</strong> e seus{' '}
+          <span className="numeric">{total}</span> disparos serão removidos em
+          definitivo — inclusive os já enviados, que somem do relatório. Não dá pra
+          desfazer.
+        </p>
+
+        {erroMsg && (
+          <p className={styles.erroModal}>
+            <Icons.alert /> {erroMsg}
+          </p>
+        )}
+
+        <div className={styles.modalAcoes}>
+          <button type="button" className={ui.botao} onClick={onFechar} disabled={excluindo}>
+            Cancelar
+          </button>
+          <button type="button" className={styles.botaoPerigo} onClick={confirmar} disabled={excluindo}>
+            <Icons.lixeira />
+            {excluindo ? 'Excluindo…' : 'Excluir fila'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ConfirmarRemoverNumero({
+  registro,
+  onFechar,
+  onExcluido,
+}: {
+  registro: Registro;
+  onFechar: () => void;
+  onExcluido: () => void;
+}) {
+  const [excluindo, setExcluindo] = useState(false);
+  const [erroMsg, setErroMsg] = useState<string | null>(null);
+  const jaEnviado = registro.status !== 'fila';
+
+  async function confirmar() {
+    setExcluindo(true);
+    setErroMsg(null);
+    try {
+      const r = await fetch('/api/fila', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: [registro.id] }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        setErroMsg(d.erro ?? 'Falha ao remover.');
+        return;
+      }
+      onExcluido();
+    } catch {
+      setErroMsg('Falha de rede ao remover.');
+    } finally {
+      setExcluindo(false);
+    }
+  }
+
+  return (
+    <div
+      className={styles.overlay}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Remover número da fila"
+    >
+      <div className={styles.modal}>
+        <div className={styles.modalHead}>
+          <h2 className={styles.modalTitulo}>Remover número da fila?</h2>
+          <button type="button" className={ui.botaoFantasma} onClick={onFechar} aria-label="Fechar">
+            <Icons.x />
+          </button>
+        </div>
+
+        <p className={styles.modalTexto}>
+          <strong>{registro.contato}</strong> (
+          <span className="numeric">{registro.telefone}</span>) sai desta campanha em
+          definitivo.{' '}
+          {jaEnviado
+            ? 'Este disparo já saiu — remover só apaga o registro dele do relatório.'
+            : 'O contato continua na base; só este disparo é cancelado.'}{' '}
+          Não dá pra desfazer.
+        </p>
+
+        {erroMsg && (
+          <p className={styles.erroModal}>
+            <Icons.alert /> {erroMsg}
+          </p>
+        )}
+
+        <div className={styles.modalAcoes}>
+          <button type="button" className={ui.botao} onClick={onFechar} disabled={excluindo}>
+            Cancelar
+          </button>
+          <button type="button" className={styles.botaoPerigo} onClick={confirmar} disabled={excluindo}>
+            <Icons.lixeira />
+            {excluindo ? 'Removendo…' : 'Remover número'}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

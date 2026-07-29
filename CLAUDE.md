@@ -302,6 +302,20 @@ RECEBER não. Mensagens do `updater.js` ajustadas. Versão **0.3.1 → 0.4.0**. 
 usuário:** tornar o repo `kauaaurelio/torre` público no GitHub e publicar a 0.4.0 via
 `npm run dist:publish` (com `GH_TOKEN`) — só a partir de uma release > que a instalada o
 auto-update dispara.
+2026-07-29 — **Exclusão na Fila: fila inteira + número individual.** `DELETE
+/api/campanhas/[id]` apaga a campanha inteira (a "fila inteira"); `Envio` tem
+`onDelete: Cascade` em campanhaId, então os disparos somem junto (some da Fila e do
+Relatório). `DELETE /api/fila` recebe `{ ids: [] }` de Envio e remove números
+individuais, decrementando `Campanha.total` das campanhas afetadas em `$transaction`
+(senão o progresso concluídos/total fica torto). O GET da fila agora expõe `id` por
+registro. Na tela: botão "Excluir fila" nos controles + lixeira por linha (a linha em
+`enviando` não tem lixeira — não yankar no meio do disparo, mostra `…`), ambos com
+modal de confirmação. Hard delete (mesma linha da exclusão de contato, LGPD art. 18
+VI). Apagar durante campanha rodando é seguro: o `envio.update` mid-send do worker cai
+no try/catch do `despacha` — loga e segue, sem crash nem double-send. Pedido pelo usuário.
+2026-07-29 — **Versão bumpada 0.4.1 → 0.4.2** — junta a exclusão de fila (inteira +
+número individual). Release publicada automática pelo CI (`.github/workflows/release.yml`)
+ao commitar o `package.json` no `main`. Pedido pelo usuário.
 
 ## Exceções a invariantes
 2026-07-27 — Termos de uso do WhatsApp — a rota QR os viola; risco de banimento
