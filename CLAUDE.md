@@ -316,6 +316,18 @@ no try/catch do `despacha` — loga e segue, sem crash nem double-send. Pedido p
 2026-07-29 — **Versão bumpada 0.4.1 → 0.4.2** — junta a exclusão de fila (inteira +
 número individual). Release publicada automática pelo CI (`.github/workflows/release.yml`)
 ao commitar o `package.json` no `main`. Pedido pelo usuário.
+2026-07-29 — **CI do release quebrava com 422 "Published releases must have a valid
+tag".** Com `build.publish.releaseType: "release"`, o electron-builder cria a release
+já publicada (draft=false); o GitHub recusa se a tag `vX.Y.Z` ainda não for um ref git.
+A 0.4.2 subiu o `.exe` mas morreu antes do `latest.yml` (o arquivo que o auto-update lê)
+→ o app mostrava "não encontrei o arquivo da atualização". Fix: novo passo no workflow
+cria e empurra a tag `vX.Y.Z` ANTES do `dist:publish` (idempotente, pula se já existir).
+2026-07-29 — **Versão 0.4.2 → 0.4.3 — republicação por cima do CI quebrado.** A 0.4.2
+ficou pela metade no GitHub (release publicada só com o `.exe`, sem `latest.yml`); apagar
+release publicada é destrutivo e ficou pro usuário. Em vez de reusar a 0.4.2, seguiu-se
+pra 0.4.3, que o workflow corrigido publica limpa (exe + latest.yml) — o updater pega a
+mais nova. Mesmo conteúdo da 0.4.2 (exclusão de fila) + o fix do CI. Pendência: apagar a
+release quebrada `v0.4.2` no GitHub pra não confundir. Decisão do usuário.
 
 ## Exceções a invariantes
 2026-07-27 — Termos de uso do WhatsApp — a rota QR os viola; risco de banimento
