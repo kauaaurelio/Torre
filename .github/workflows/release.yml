@@ -46,22 +46,31 @@ jobs:
             echo "existe=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # A tag PRECISA existir como ref git ANTES do electron-builder publicar. Com
-      # releaseType "release" ele cria a release já publicada (draft=false), e o
-      # GitHub recusa (422 "Published releases must have a valid tag") se a tag não
-      # existir ainda — foi o que quebrou a 0.4.2 (subiu o .exe mas morreu antes do
-      # latest.yml, o arquivo que o auto-update lê). Criar a tag aqui resolve na raiz.
-      - name: Criar e empurrar a tag da versão
+      # Prepara a tag E a release ANTES do electron-builder rodar. Dois motivos:
+      #  1) Com releaseType "release" o electron-builder cria a release já publicada
+      #     (draft=false); o GitHub recusa (422 "Published releases must have a valid
+      #     tag") se a tag ainda não for um ref git — quebrou a 0.4.2.
+      #  2) Se a release NÃO existir, o electron-builder sobe os assets em paralelo e
+      #     CADA upload dispara um "create release" — a corrida cria DUAS releases na
+      #     mesma tag (uma com o .exe/latest.yml, outra com o blockmap), e o download
+      #     por tag passa a dar 404. Quebrou a 0.4.3.
+      # Pré-criando a release vazia aqui, o electron-builder ACHA ela e só anexa os
+      # assets (sem criar nada) — publica tudo numa release só.
+      - name: Preparar tag + release vazia (evita 422 e a corrida de criação)
         if: steps.check.outputs.existe == 'false'
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           V="v${{ steps.ver.outputs.v }}"
-          if git ls-remote --tags origin "refs/tags/$V" | grep -q "refs/tags/$V"; then
-            echo "Tag $V já existe no remoto — ok."
-          else
+          if ! git ls-remote --tags origin "refs/tags/$V" | grep -q "refs/tags/$V"; then
             git tag "$V"
             git push origin "$V"
             echo "Tag $V criada e empurrada."
+          fi
+          if ! gh release view "$V" >/dev/null 2>&1; then
+            gh release create "$V" --title "$V" --notes "Torre $V" --target main
+            echo "Release $V criada (vazia) — o electron-builder anexa os assets."
           fi
 
       - name: Instalar dependências
